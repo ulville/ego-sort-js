@@ -34,7 +34,7 @@ const getTotalPage = async () => {
   }
 };
 
-// ihtiyacım olanlar: Anlık lazım{1- Kaç sayfa cevap verdi}, 2- order kaç, 3- extension sayısı,  
+// ihtiyacım olanlar: Anlık lazım{1- Kaç sayfa cevap verdi}, 2- ranking kaç, 3- extension sayısı,  
 
 const getPage = async (page) => {
   try {
@@ -42,18 +42,18 @@ const getPage = async (page) => {
     
     const response = await axios.request(options);
     respondedPage++;
-    let order;
+    let ranking;
     const extensions = response.data['extensions'];
     for (let i = 0; i < extensions.length; i++) {
       const extension = extensions[i];
       if (extension['name'] === 'EasyEffects Preset Selector') {
-        order = ((page - 1) * Number(options.params.n_per_page)) + i + 1;
+        ranking = ((page - 1) * Number(options.params.n_per_page)) + i + 1;
       }
     }
     console.log('Page responded:', response.config.params.page, 
       'page count:', respondedPage);
     egoEmitter.emit('pageResponse', respondedPage);
-    return Promise.resolve({'order': order, 'extNumOnPage': extensions.length});
+    return Promise.resolve({'ranking': ranking, 'extNumOnPage': extensions.length});
   } catch (error) {
     egoEmitter.emit('pageError', error);
     return Promise.reject(error);
@@ -69,12 +69,12 @@ const getExtensions = async (totalPage) => {
   return Promise.all(tasks)
     .then((values) => {
       console.log('All pages responded!');
-      const order = values.find(value => value.order).order;
+      const ranking = values.find(value => value.ranking).ranking;
       let totalExtensionNum = 0;
       values.forEach(val => {
         totalExtensionNum += val.extNumOnPage;
       });
-      const result = {'extensionNumber': totalExtensionNum, 'order': order, 'respondedPage': respondedPage, 'finished': 'yes'};
+      const result = {'extensionNumber': totalExtensionNum, 'ranking': ranking, 'respondedPage': respondedPage, 'finished': 'yes'};
       console.log(result);
       return Promise.resolve(result);
 

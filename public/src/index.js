@@ -93,8 +93,8 @@ function pollForRemoteResponses(query) {
       } 
       else 
       {
-        document.getElementById('order-label').innerHTML = 'Order: ';
-        document.getElementById('order').innerHTML = res.order;
+        document.getElementById('ranking-label').innerHTML = 'Ranking: ';
+        document.getElementById('ranking').innerHTML = res.ranking;
         document.getElementById('extension-num-label').innerHTML = 'Total Extension Number: ';
         document.getElementById('extension-num').innerHTML = res.extensionNumber;
       }
