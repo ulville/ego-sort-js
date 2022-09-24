@@ -1,0 +1,21 @@
+{
+    "method": "GET",
+    "url": "https://extensions.gnome.org/extension-query",
+    "params": {
+        "sort": "downloads",
+        "page": "1",
+        "shell_version": "all",
+        "n_per_page": "25"
+    },
+    "headers": {
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language": "tr-TR,tr;q=0.8,en-US;q=0.5,en;q=0.3",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Referer": "https://extensions.gnome.org/",
+        "X-Requested-With": "XMLHttpRequest",
+        "Connection": "keep-alive",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin"
+    }
+}

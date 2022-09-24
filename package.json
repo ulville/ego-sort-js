@@ -1,0 +1,19 @@
+{
+  "name": "ego-sort",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "devStart": "nodemon server.js"
+  },
+  "author": "ulville",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19",
+    "eslint": "^8.23.1"
+  }
+}
