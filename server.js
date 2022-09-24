@@ -33,6 +33,7 @@ app.get('/exit', (req, res) => {
 
 app.get('/numpage', async (req, res) => {
   try {
+    ego_result = undefined;
     console.log('wow! client wants total page!');
     totalPage = await getTotalPage();
     res.json({'totalPage': totalPage.toString()});
