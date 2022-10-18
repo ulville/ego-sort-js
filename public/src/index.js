@@ -97,6 +97,14 @@ function pollForRemoteResponses(query) {
         document.getElementById('ranking').innerHTML = res.ranking;
         document.getElementById('extension-num-label').innerHTML = 'Total Extension Number: ';
         document.getElementById('extension-num').innerHTML = res.extensionNumber;
+        const logs = res.logs;
+        let tableHTML = '<table border=\'1\'>';
+        tableHTML += '<tr><th>Date</th><th>Ranking</th><th>Total</th></tr>';
+        for (let x in logs) {
+          tableHTML += '<tr><td>' + logs[x].date + '</td><td>' + logs[x].ranking + '</td><td>' + logs[x].total + '</td></tr>';
+        }
+        tableHTML += '</table>';
+        document.getElementById('table-container').innerHTML = tableHTML;
       }
     }
     else if (this.readyState == 4 && this.status != 200){

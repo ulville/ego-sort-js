@@ -128,3 +128,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# custom files
+logs.csv
+csv-to-json.js
+logs.json

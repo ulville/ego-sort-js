@@ -24,6 +24,8 @@ let ego_result;
 const app = express();
 app.use(express.static('public'));
 
+// TODO: Listen for emitted errors globally and act in a middleware
+
 app.get('/exit', (req, res) => {
   console.log('client wants us to exit');
   res.status(200).send('BYE!');
@@ -60,7 +62,7 @@ app.get('/getext', async (req, res) => {
     if (ego_result === undefined) {
       const pageRespondedPromise = new Promise((resolve, reject) => {
         egoEmitter.on('pageResponse', (respondedPage) => resolve(respondedPage));
-        egoEmitter.on('pageError', (err) => reject(err));
+        egoEmitter.on('error', (err) => {reject(err);});
       });
       const numberOfRespondedPages = await pageRespondedPromise;
       console.log('page responded event emitted:', numberOfRespondedPages);

@@ -15,10 +15,28 @@
 const axios = require('axios').default;
 axios.defaults.timeout = 15000;
 const EventEmitter = require('events');
+const fs = require('fs').promises;
 let options = require('./options.json');
 let respondedPage = 0;
 
 const egoEmitter = new EventEmitter(); 
+
+const saveAsLog = async (newResult) => {
+  try {
+    newResult.ranking = newResult.ranking.toString();
+    newResult.total = newResult.total.toString();
+    const logFile = await fs.readFile('./logs.json', 'utf8');
+    let logs = JSON.parse(logFile);
+    if (logs[logs.length -1].date !== newResult.date || logs[logs.length -1].ranking !== newResult.ranking || logs[logs.length -1].total !== newResult.total ) {
+      logs.push(newResult);
+      fs.writeFile('./logs.json', JSON.stringify(logs, null, '    '));
+    }
+    return Promise.resolve(logs);
+  } catch (error){
+    console.log(error);
+    return Promise.reject(error);
+  }
+};
 
 const getTotalPage = async () => {
   try {
@@ -33,8 +51,6 @@ const getTotalPage = async () => {
     return Promise.reject(error);
   }
 };
-
-// ihtiyacım olanlar: Anlık lazım{1- Kaç sayfa cevap verdi}, 2- ranking kaç, 3- extension sayısı,  
 
 const getPage = async (page) => {
   try {
@@ -55,7 +71,7 @@ const getPage = async (page) => {
     egoEmitter.emit('pageResponse', respondedPage);
     return Promise.resolve({'ranking': ranking, 'extNumOnPage': extensions.length});
   } catch (error) {
-    egoEmitter.emit('pageError', error);
+    egoEmitter.emit('error', error);
     return Promise.reject(error);
   }
 };
@@ -67,16 +83,32 @@ const getExtensions = async (totalPage) => {
     tasks.push(getPage(i));
   }
   return Promise.all(tasks)
-    .then((values) => {
+    .then(async (values) => {
       console.log('All pages responded!');
       const ranking = values.find(value => value.ranking).ranking;
       let totalExtensionNum = 0;
       values.forEach(val => {
         totalExtensionNum += val.extNumOnPage;
       });
-      const result = {'extensionNumber': totalExtensionNum, 'ranking': ranking, 'respondedPage': respondedPage, 'finished': 'yes'};
-      console.log(result);
-      return Promise.resolve(result);
+      let result = {'extensionNumber': totalExtensionNum, 'ranking': ranking, 'respondedPage': respondedPage, 'finished': 'yes'};
+      const now = new Date();
+      const year = now.getFullYear().toString();
+      const month = now.getMonth().toString() > 9 ? now.getMonth() : '0' + now.getMonth().toString();
+      const day = now.getDate().toString() > 9 ? now.getDate() : '0' + now.getDate().toString();
+      const date = year + '-' + month + '-' + day;
+      const newLogEntry = {date, ranking, 'total': totalExtensionNum};
+      console.log('newLogEntry:', newLogEntry);
+      try {
+        const logs = await saveAsLog(newLogEntry);
+        result['logs'] = logs;
+        console.log(result);
+        console.log(logs);
+        return Promise.resolve(result);
+        
+      } catch (error) {
+        egoEmitter.emit('error', error);
+        return Promise.reject(error);        
+      }
 
     }).catch((error) => {
       console.error(error);
