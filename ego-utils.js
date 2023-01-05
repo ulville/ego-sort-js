@@ -93,7 +93,7 @@ const getExtensions = async (totalPage) => {
       let result = {'extensionNumber': totalExtensionNum, 'ranking': ranking, 'respondedPage': respondedPage, 'finished': 'yes'};
       const now = new Date();
       const year = now.getFullYear().toString();
-      const month = now.getMonth().toString() > 9 ? now.getMonth() : '0' + now.getMonth().toString();
+      const month = (now.getMonth() + 1).toString() > 9 ? now.getMonth() + 1 : '0' + (now.getMonth() + 1).toString();
       const day = now.getDate().toString() > 9 ? now.getDate() : '0' + now.getDate().toString();
       const date = year + '-' + month + '-' + day;
       const newLogEntry = {date, ranking, 'total': totalExtensionNum};
