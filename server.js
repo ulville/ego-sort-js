@@ -25,59 +25,47 @@ const app = express();
 app.use(express.static('public'));
 
 // TODO: Listen for emitted errors globally and act in a middleware
+const sseChunk = (event, data) => {
+  let sseId = (new Date()).getTime();
+  return `id: ${sseId}\nevent: ${event}\ndata: ${data}\n\n`;
+};
+
+app.get('/events', async function(req, res) {
+  console.log('Got /events');
+  try {
+    res.set({
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'text/event-stream',
+      'Connection': 'keep-alive'
+    });
+    res.flushHeaders();
+  
+    console.log('Starting... getTotalPage()');
+    totalPage = await getTotalPage();
+    res.write(sseChunk('totalPage', JSON.stringify({'totalPage': totalPage.toString()})));
+    egoEmitter.on('pageResponse', (rP) => {
+      res.write(sseChunk('respondedPage', JSON.stringify({'respondedPage': rP})));
+    });
+    const callback = (error) => {
+      egoEmitter.removeListener('error', callback);
+      throw error;
+    };
+    egoEmitter.on('error', callback);
+    ego_result = await getExtensions(totalPage);
+    res.end(sseChunk('done', JSON.stringify(ego_result)));
+  } catch (error) {
+    console.error(JSON.stringify(error, Object.getOwnPropertyNames(Error.prototype).concat(Object.getOwnPropertyNames(new Error)), 4)
+      .replace('\\n', '\n'));
+    res.end(sseChunk('error', JSON.stringify({'error': JSON.stringify(
+      error, Object.getOwnPropertyNames(Error.prototype).concat(Object.getOwnPropertyNames(new Error)), 4)})));
+  }
+});
 
 app.get('/exit', (req, res) => {
   console.log('client wants us to exit');
   res.status(200).send('BYE!');
   server.close();
-  process.exit();
-});
-
-app.get('/numpage', async (req, res) => {
-  try {
-    ego_result = undefined;
-    console.log('wow! client wants total page!');
-    totalPage = await getTotalPage();
-    res.json({'totalPage': totalPage.toString()});
-  } catch (error) {
-    res.status(500).send(error);
-  }  
-});
-
-app.get('/run', async (req, res) => {
-  try {
-    console.log('Starting getExtensions');
-    res.json({'requestedPage': totalPage.toString()});
-    ego_result = await getExtensions(totalPage);
-    console.log('Finished awaiting getExtensions. We got ego_result');
-  } catch (error) {
-    // res.status(500).send(error);
-  }  
-});
-
-app.get('/getext', async (req, res) => {
-  try {
-    console.log('client said getext');
-    console.log('EGO_RESULT:', ego_result);
-    if (ego_result === undefined) {
-      const pageRespondedPromise = new Promise((resolve, reject) => {
-        egoEmitter.on('pageResponse', (respondedPage) => resolve(respondedPage));
-        egoEmitter.on('error', (err) => {reject(err);});
-      });
-      const numberOfRespondedPages = await pageRespondedPromise;
-      console.log('page responded event emitted:', numberOfRespondedPages);
-      res.json({'respondedPage': numberOfRespondedPages});
-    } else {
-      console.log('Sending finished flag');
-      const result = ego_result;
-      res.json(result);
-    }
-  } catch (error) {
-    res.status(500).send(error);
-  }
+  process.exit(0);
 });
 
 const server = app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
-
-
-

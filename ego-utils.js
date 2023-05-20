@@ -33,7 +33,6 @@ const saveAsLog = async (newResult) => {
     }
     return Promise.resolve(logs);
   } catch (error){
-    console.log(error);
     return Promise.reject(error);
   }
 };
@@ -46,8 +45,6 @@ const getTotalPage = async () => {
     console.log('Total Page:', totalPage);
     return Promise.resolve(totalPage);
   } catch (error) {
-    console.error(error);
-    console.log(error.name, error.message);
     return Promise.reject(error);
   }
 };
@@ -71,17 +68,21 @@ const getPage = async (page) => {
     egoEmitter.emit('pageResponse', respondedPage);
     return Promise.resolve({'ranking': ranking, 'extNumOnPage': extensions.length});
   } catch (error) {
+    console.error('getPage Catched:', error);
     egoEmitter.emit('error', error);
     return Promise.reject(error);
   }
 };
 
 const getExtensions = async (totalPage) => {
+  respondedPage = 0;
   let tasks = [];
+  console.log('sending ego request for pages below and adding them to tasks array');
   for (let i = 1; i < totalPage + 1; i++) {
-    console.log(`sending ego request for page ${i} and adding it to tasks array`);
+    process.stdout.write(`${i}, `);
     tasks.push(getPage(i));
   }
+  process.stdout.write('\n');
   return Promise.all(tasks)
     .then(async (values) => {
       console.log('All pages responded!');
@@ -101,8 +102,7 @@ const getExtensions = async (totalPage) => {
       try {
         const logs = await saveAsLog(newLogEntry);
         result['logs'] = logs;
-        console.log(result);
-        console.log(logs);
+        console.log('RESULT:', result);
         return Promise.resolve(result);
         
       } catch (error) {
@@ -111,13 +111,8 @@ const getExtensions = async (totalPage) => {
       }
 
     }).catch((error) => {
-      console.error(error);
-      console.log(error.name, error.message);
       return Promise.reject(error);
-    }).finally(() => {respondedPage = 0;});
+    });
 };
 
-// getTotalPage().then(x => getExtensions(x)).catch(x => console.log(x));
-
 module.exports = {getTotalPage, getPage, getExtensions, egoEmitter};
-
