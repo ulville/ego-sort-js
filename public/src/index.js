@@ -80,7 +80,7 @@ eventSource.addEventListener('done', (event) => {
   const logs = data.logs;
   let tableHTML = '<table>';
   tableHTML += '<tr><th>Date</th><th>Ranking</th><th>Total</th></tr>';
-  for (let x in logs) {
+  for (let x in logs.reverse()) {
     tableHTML += '<tr><td>' + logs[x].date + '</td><td>' + logs[x].ranking + '</td><td>' + logs[x].total + '</td></tr>';
   }
   tableHTML += '</table>';
