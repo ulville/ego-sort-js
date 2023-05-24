@@ -16,15 +16,11 @@
 const PORT = 5000;
 
 const express = require('express');
-const {getTotalPage, getExtensions, egoEmitter} = require('./ego-utils');
-
-let totalPage;
-let ego_result;
+const {EgoScraper} = require('./ego-utils');
 
 const app = express();
 app.use(express.static('public'));
 
-// TODO: Listen for emitted errors globally and act in a middleware
 const sseChunk = (event, data) => {
   let sseId = (new Date()).getTime();
   return `id: ${sseId}\nevent: ${event}\ndata: ${data}\n\n`;
@@ -32,6 +28,8 @@ const sseChunk = (event, data) => {
 
 app.get('/events', async function(req, res) {
   console.log('Got /events');
+  console.log(req.headers.cookie);
+  const es = new EgoScraper();
   try {
     res.set({
       'Cache-Control': 'no-cache',
@@ -41,17 +39,17 @@ app.get('/events', async function(req, res) {
     res.flushHeaders();
   
     console.log('Starting... getTotalPage()');
-    totalPage = await getTotalPage();
+    const totalPage = await es.getTotalPage();
     res.write(sseChunk('totalPage', JSON.stringify({'totalPage': totalPage.toString()})));
-    egoEmitter.on('pageResponse', (rP) => {
+    es.egoEmitter.on('pageResponse', (rP) => {
       res.write(sseChunk('respondedPage', JSON.stringify({'respondedPage': rP})));
     });
     const callback = (error) => {
-      egoEmitter.removeListener('error', callback);
+      es.egoEmitter.removeListener('error', callback);
       throw error;
     };
-    egoEmitter.on('error', callback);
-    ego_result = await getExtensions(totalPage);
+    es.egoEmitter.on('error', callback);
+    const ego_result = await es.getExtensions(totalPage);
     res.end(sseChunk('done', JSON.stringify(ego_result)));
   } catch (error) {
     console.error(JSON.stringify(error, Object.getOwnPropertyNames(Error.prototype).concat(Object.getOwnPropertyNames(new Error)), 4)
