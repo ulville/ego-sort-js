@@ -26,16 +26,26 @@ class EgoScraper {
 
   saveAsLog = async (newResult) => {
     try {
+      const logPath = './logs.json';
       newResult.ranking = newResult.ranking.toString();
       newResult.total = newResult.total.toString();
-      const logFile = await fs.readFile('./logs.json', 'utf8');
-      let logs = JSON.parse(logFile);
-      if (logs[logs.length -1].date !== newResult.date || logs[logs.length -1].ranking !== newResult.ranking || logs[logs.length -1].total !== newResult.total ) {
+      try {
+        await fs.access(logPath, fs.constants.R_OK);
+        const logFile = await fs.readFile(logPath, 'utf8');
+        let logs = JSON.parse(logFile);
+        if (logs[logs.length -1].date !== newResult.date || logs[logs.length -1].ranking !== newResult.ranking || logs[logs.length -1].total !== newResult.total ) {
+          logs.push(newResult);
+          fs.writeFile(logPath, JSON.stringify(logs, null, '    '));
+        }
+        return Promise.resolve(logs);
+      } catch (error){
+        console.log('### File doesn\'t exist\n### Creating new file:', logPath);
+        let logs = [];
         logs.push(newResult);
-        fs.writeFile('./logs.json', JSON.stringify(logs, null, '    '));
+        fs.writeFile(logPath, JSON.stringify(logs, null, '    '));
+        return Promise.resolve(logs);
       }
-      return Promise.resolve(logs);
-    } catch (error){
+    } catch (error) {
       return Promise.reject(error);
     }
   }; 

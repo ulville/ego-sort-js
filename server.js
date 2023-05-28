@@ -54,6 +54,7 @@ app.get('/events', async function(req, res) {
   } catch (error) {
     console.error(JSON.stringify(error, Object.getOwnPropertyNames(Error.prototype).concat(Object.getOwnPropertyNames(new Error)), 4)
       .replace('\\n', '\n'));
+    console.error(error);
     res.end(sseChunk('error', JSON.stringify({'error': JSON.stringify(
       error, Object.getOwnPropertyNames(Error.prototype).concat(Object.getOwnPropertyNames(new Error)), 4)})));
   }

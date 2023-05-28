@@ -133,3 +133,4 @@ dist
 logs.csv
 csv-to-json.js
 logs.json
+logs.json.bak
