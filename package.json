@@ -4,7 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "devStart": "nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "gui": "./run.sh"
   },
   "author": "ulville",
   "license": "Apache-2.0",
