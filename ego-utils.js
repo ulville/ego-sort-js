@@ -81,7 +81,7 @@ class EgoScraper {
       this.egoEmitter.emit('pageResponse', this.respondedPage);
       return Promise.resolve({'ranking': ranking, 'extNumOnPage': extensions.length});
     } catch (error) {
-      console.error('getPage Catched:', error);
+      console.error('getPage Caught:', error);
       this.egoEmitter.emit('error', error);
       return Promise.reject(error);
     }
